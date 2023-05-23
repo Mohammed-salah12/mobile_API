@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "939093369052",
+    "project_id": "mobileupdated-73b2b",
+    "storage_bucket": "mobileupdated-73b2b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:939093369052:android:2bdc69ea7c535eec74d419",
+        "android_client_info": {
+          "package_name": "mobile.comm"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "939093369052-4geptu2r0nv3upmn2ts1pqi4g512r1ui.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBT5lQPnpKNaU34lG-3XPo9F0JVdxReru8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "939093369052-4geptu2r0nv3upmn2ts1pqi4g512r1ui.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
