@@ -22,97 +22,170 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 
-Route::prefix('/Firebase/')->group(function(){
+Route::prefix('/firebase/')->group(function(){
     Route::post('/send-otp', [FirebaseController::class, 'sendOTP']);
     Route::post('/verify-otp', [FirebaseController::class, 'verifyOTP']);
-    Route::get('/construct', [FirebaseController::class, '__construct']);
-
 });
 
-Route::prefix('/Users/')->group(function(){
-    Route::apiResource('User' , App\Http\Controllers\api\UserController::class) ;
-    Route::get('construct' , [\App\Http\Controllers\api\UserController::class , '__construct'] )->name('construct');
-    Route::post('verifyToken' , [\App\Http\Controllers\api\UserController::class , 'verifyToken'] )->name('verifyToken');
-});
-
-
-Route::prefix('/WalkThrows/')->group(function(){
-    Route::apiResource('WalkThrow' , App\Http\Controllers\api\Walk_thorwController::class) ;
-    Route::get('construct' , [\App\Http\Controllers\api\Walk_thorwController::class , '__construct'] )->name('construct');
-    Route::post('verifyToken' , [\App\Http\Controllers\api\Walk_thorwController::class , 'verifyToken'] )->name('verifyToken');
+Route::prefix('users')->as('users.')->group(function () {
+    Route::get('/', 'App\Http\Controllers\api\UserController@index')->name('index');
+    Route::post('/', 'App\Http\Controllers\api\UserController@store')->name('store');
+    Route::get('/{id}', 'App\Http\Controllers\api\UserController@show')->name('show');
+    Route::put('/{id}', 'App\Http\Controllers\api\UserController@update')->name('update');
+    Route::delete('/{id}', 'App\Http\Controllers\api\UserController@destroy')->name('destroy');
 });
 
 
-Route::prefix('/Attachments/')->group(function(){
-    Route::apiResource('Attachment' , App\Http\Controllers\api\AttachmentController::class) ;
-    Route::get('construct' , [\App\Http\Controllers\api\AttachmentController::class , '__construct'] )->name('construct');
-    Route::post('verifyToken' , [\App\Http\Controllers\api\AttachmentController::class , 'verifyToken'] )->name('verifyToken');
+
+
+
+Route::prefix('walkthroughts')->as('walkthroughes.')->group(function () {
+    Route::get('/', 'App\Http\Controllers\api\Walk_thorwController@index')->name('index');
+    Route::post('/', 'App\Http\Controllers\api\Walk_thorwController@store')->name('store');
+    Route::get('/{id}', 'App\Http\Controllers\api\Walk_thorwController@show')->name('show');
+    Route::put('/{id}', 'App\Http\Controllers\api\Walk_thorwController@update')->name('update');
+    Route::delete('/{id}', 'App\Http\Controllers\api\Walk_thorwController@destroy')->name('destroy');
 });
 
 
-Route::prefix('/Comments/')->group(function(){
-    Route::apiResource('Comment' , App\Http\Controllers\api\CommentController::class) ;
-    Route::get('construct' , [\App\Http\Controllers\api\CommentController::class , '__construct'] )->name('construct');
-    Route::post('verifyToken' , [\App\Http\Controllers\api\CommentController::class , 'verifyToken'] )->name('verifyToken');
+
+Route::prefix('attachments')->as('attachments.')->group(function () {
+    Route::get('/', 'App\Http\Controllers\api\AttachmentController@index')->name('index');
+    Route::post('/', 'App\Http\Controllers\api\AttachmentController@store')->name('store');
+    Route::get('/{id}', 'App\Http\Controllers\api\AttachmentController@show')->name('show');
+    Route::put('/{id}', 'App\Http\Controllers\api\AttachmentController@update')->name('update');
+    Route::delete('/{id}', 'App\Http\Controllers\api\AttachmentController@destroy')->name('destroy');
 });
 
 
-Route::prefix('/Projects/')->group(function(){
-    Route::apiResource('Project' , App\Http\Controllers\api\ProjectController::class) ;
-    Route::put('projects/{id}' , [\App\Http\Controllers\api\ProjectController::class , 'update'] )->name('update');
-    Route::get('construct' , [\App\Http\Controllers\api\ProjectController::class , '__construct'] )->name('construct');
-    Route::post('verifyToken' , [\App\Http\Controllers\api\ProjectController::class , 'verifyToken'] )->name('verifyToken');
+Route::prefix('comments')->as('comments.')->group(function () {
+    Route::get('/', 'App\Http\Controllers\api\CommentController@index')->name('index');
+    Route::post('/', 'App\Http\Controllers\api\CommentController@store')->name('store');
+    Route::get('/{id}', 'App\Http\Controllers\api\CommentController@show')->name('show');
+    Route::put('/{id}', 'App\Http\Controllers\api\CommentController@update')->name('update');
+    Route::delete('/{id}', 'App\Http\Controllers\api\CommentController@destroy')->name('destroy');
 });
 
-
-Route::prefix('/Tasks/')->group(function(){
-    Route::apiResource('Task' , App\Http\Controllers\api\TaskController::class);
-    Route::get('construct' , [\App\Http\Controllers\api\TaskController::class , '__construct'] )->name('construct');
-    Route::post('verifyToken' , [\App\Http\Controllers\api\TaskController::class , 'verifyToken'] )->name('verifyToken');
+Route::prefix('projects')->as('projects.')->group(function () {
+    Route::get('/', 'App\Http\Controllers\api\ProjectController@index')->name('index');
+    Route::post('/', 'App\Http\Controllers\api\ProjectController@store')->name('store');
+    Route::get('/{id}', 'App\Http\Controllers\api\ProjectController@show')->name('show');
+    Route::put('/{id}', 'App\Http\Controllers\api\ProjectController@update')->name('update');
+    Route::delete('/{id}', 'App\Http\Controllers\api\ProjectController@destroy')->name('destroy');
 });
 
-
-Route::prefix('/FeaturedTasks/')->group(function(){
-    Route::apiResource('FeaturedTask' , App\Http\Controllers\api\Featured_TaskController::class) ;
-    Route::get('construct' , [\App\Http\Controllers\api\Featured_TaskController::class , '__construct'] )->name('construct');
-    Route::post('verifyToken' , [\App\Http\Controllers\api\Featured_TaskController::class , 'verifyToken'] )->name('verifyToken');
+Route::prefix('tasks')->as('tasks.')->group(function () {
+    Route::get('/', 'App\Http\Controllers\api\TaskController@index')->name('index');
+    Route::post('/', 'App\Http\Controllers\api\TaskController@store')->name('store');
+    Route::get('/{id}', 'App\Http\Controllers\api\TaskController@show')->name('show');
+    Route::put('/{id}', 'App\Http\Controllers\api\TaskController@update')->name('update');
+    Route::delete('/{id}', 'App\Http\Controllers\api\TaskController@destroy')->name('destroy');
 });
 
-
-Route::prefix('/Notifications/')->group(function(){
-    Route::apiResource('Notification' , App\Http\Controllers\api\NotificationController::class);
-    Route::get('construct' , [\App\Http\Controllers\api\NotificationController::class , '__construct'] )->name('construct');
-    Route::post('verifyToken' , [\App\Http\Controllers\api\NotificationController::class , 'verifyToken'] )->name('verifyToken');
+Route::prefix('featured-tasks')->as('featured-tasks.')->group(function () {
+    Route::get('/', 'App\Http\Controllers\api\Featured_TaskController@index')->name('index');
+    Route::post('/', 'App\Http\Controllers\api\Featured_TaskController@store')->name('store');
+    Route::get('/{id}', 'App\Http\Controllers\api\Featured_TaskController@show')->name('show');
+    Route::put('/{id}', 'App\Http\Controllers\api\Featured_TaskController@update')->name('update');
+    Route::delete('/{id}', 'App\Http\Controllers\api\Featured_TaskController@destroy')->name('destroy');
 });
 
-
-Route::prefix('/Promotions/')->group(function(){
-    Route::apiResource('Promotion' , App\Http\Controllers\api\PromotionController::class) ;
-    Route::get('construct' , [\App\Http\Controllers\api\PromotionController::class , '__construct'] )->name('construct');
-    Route::post('verifyToken' , [\App\Http\Controllers\api\PromotionController::class , 'verifyToken'] )->name('verifyToken');
+Route::prefix('notifications')->as('notifications.')->group(function () {
+    Route::get('/', 'App\Http\Controllers\api\NotificationController@index')->name('index');
+    Route::post('/', 'App\Http\Controllers\api\NotificationController@store')->name('store');
+    Route::get('/{id}', 'App\Http\Controllers\api\NotificationController@show')->name('show');
+    Route::put('/{id}', 'App\Http\Controllers\api\NotificationController@update')->name('update');
+    Route::delete('/{id}', 'App\Http\Controllers\api\NotificationController@destroy')->name('destroy');
 });
 
-
-Route::prefix('/Contacts/')->group(function(){
-    Route::apiResource('Contact' , App\Http\Controllers\api\ContactController::class);
-    Route::get('construct' , [\App\Http\Controllers\api\ContactController::class , '__construct'] )->name('construct');
-    Route::post('verifyToken' , [\App\Http\Controllers\api\ContactController::class , 'verifyToken'] )->name('verifyToken');
+Route::prefix('promotions')->as('promotions.')->group(function () {
+    Route::get('/', 'App\Http\Controllers\api\PromotionController@index')->name('index');
+    Route::post('/', 'App\Http\Controllers\api\PromotionController@store')->name('store');
+    Route::get('/{id}', 'App\Http\Controllers\api\PromotionController@show')->name('show');
+    Route::put('/{id}', 'App\Http\Controllers\api\PromotionController@update')->name('update');
+    Route::delete('/{id}', 'App\Http\Controllers\api\PromotionController@destroy')->name('destroy');
 });
 
-
-Route::prefix('/Projects/Users/')->group(function(){
+Route::prefix('contacts')->as('contacts.')->group(function () {
+    Route::get('/', 'App\Http\Controllers\api\ContactController@index')->name('index');
+    Route::post('/', 'App\Http\Controllers\api\ContactController@store')->name('store');
+    Route::get('/{id}', 'App\Http\Controllers\api\ContactController@show')->name('show');
+    Route::put('/{id}', 'App\Http\Controllers\api\ContactController@update')->name('update');
+    Route::delete('/{id}', 'App\Http\Controllers\api\ContactController@destroy')->name('destroy');
+});
+Route::prefix('projects/users')->as('projects-users.')->group(function(){
     Route::post('attach', [\App\Http\Controllers\Api\ProjectUserController::class, 'attachUser']);
     Route::post('detach', [\App\Http\Controllers\Api\ProjectUserController::class, 'detachUser']);
-    Route::put('state', [\App\Http\Controllers\Api\ProjectUserController::class, 'updateUserState']);
-    Route::get('construct' , [\App\Http\Controllers\api\ProjectUserController::class , '__construct'] )->name('construct');
-    Route::post('verifyToken' , [\App\Http\Controllers\api\ProjectUserController::class , 'verifyToken'] )->name('verifyToken');
 });
 
 
-Route::prefix('/Tasks/Users/')->group(function(){
+Route::prefix('tasks/users')->as('tasks-users.')->group(function(){
     Route::post('attach', [\App\Http\Controllers\Api\TaskUserController::class, 'attachUser']);
     Route::post('detach', [\App\Http\Controllers\Api\TaskUserController::class, 'detachUser']);
-    Route::put('state', [\App\Http\Controllers\Api\TaskUserController::class, 'updateUserState']);
-    Route::get('construct' , [\App\Http\Controllers\api\TaskUserController::class , '__construct'] )->name('construct');
-    Route::post('verifyToken' , [\App\Http\Controllers\api\TaskUserController::class , 'verifyToken'] )->name('verifyToken');
 });
+
+//Route::prefix('users')->as('users.')->group(function(){
+//    Route::apiResource('/', 'App\Http\Controllers\api\UserController')->parameters([
+//        'users' => 'id'
+//    ]);
+//});
+
+//Route::prefix('users')->as('users.')->group(function(){
+//    // Define the index route without an ID parameter
+//    Route::get('/', 'App\Http\Controllers\api\UserController@index')->name('index');
+//
+//    // Define the store route without an ID parameter
+//    Route::post('/', 'App\Http\Controllers\api\UserController@store')->name('store');
+//
+//    // Define the resource route with an ID parameter for the remaining functions
+//    Route::apiResource('/{id}', 'App\Http\Controllers\api\UserController')->except(['index', 'store']);
+//
+//});
+
+//Route::prefix('users')->group(function(){
+//    Route::apiResource('/' , App\Http\Controllers\api\UserController::class) ;
+//});
+//Route::prefix('walkthroughts')->as('walkthroughes.')->group(function(){
+//    Route::apiResource('/' , App\Http\Controllers\api\Walk_thorwController::class) ;
+//});
+//Route::prefix('attachments')->as('attachments.')->group(function(){
+//    Route::apiResource('/' , App\Http\Controllers\api\AttachmentController::class) ;
+//});
+
+
+//Route::prefix('comments')->as('comments.')->group(function(){
+//    Route::apiResource('/' , App\Http\Controllers\api\CommentController::class) ;
+//});
+//
+//
+//Route::prefix('projects')->as('projects.')->group(function(){
+//    Route::apiResource('/' , App\Http\Controllers\api\ProjectController::class) ;
+//});
+//
+//
+//Route::prefix('tasks')->as('tasks.')->group(function(){
+//    Route::apiResource('/' , App\Http\Controllers\api\TaskController::class);
+//});
+//
+//
+//Route::prefix('featured-tasks')->as('featured-tasks.')->group(function(){
+//    Route::apiResource('/' , App\Http\Controllers\api\Featured_TaskController::class) ;
+//});
+//
+//
+//Route::prefix('notifications')->as('notifications.')->group(function(){
+//    Route::apiResource('/' , App\Http\Controllers\api\NotificationController::class);
+//});
+//
+//
+//Route::prefix('promotions')->as('promotions.')->group(function(){
+//    Route::apiResource('/' , App\Http\Controllers\api\PromotionController::class) ;
+//});
+//
+//
+//Route::prefix('contacts')->as('contacts.')->group(function(){
+//    Route::apiResource('/' , App\Http\Controllers\api\ContactController::class);
+//});
+
+
+

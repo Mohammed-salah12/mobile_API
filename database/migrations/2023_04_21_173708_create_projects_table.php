@@ -31,9 +31,9 @@ class CreateProjectsTable extends Migration
                 \App\Constants\TaskPriority::not_A_Proirity,
             ])->default(\App\Constants\TaskPriority::not_A_Proirity);
             $table->enum('status', ['active', 'done']);
-            $table->time('time_Hours');
-            $table->time('time_Min');
-            $table->enum('time_Am_BM', ['am', 'pm']);
+            $table->time('time_hours');
+            $table->time('time_min');
+            $table->enum('time_am_bm', ['am', 'pm']);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

@@ -4,15 +4,13 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
+use Illuminate\Http\Request;
 use Firebase\Auth\Token\Exception\InvalidToken;
 use Firebase\JWT\ExpiredException;
-use Illuminate\Http\Request;
-use Kreait\Firebase\Auth;
 use Illuminate\Support\Facades\Validator;
-
+use Kreait\Firebase\Auth;
 class NotificationController extends Controller
 {
-
     private $auth;
 
     public function __construct(Auth $auth)
@@ -37,61 +35,142 @@ class NotificationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Auth $firebaseAuth)
+    public function index()
     {
-        $firebaseUser = $firebaseAuth->getUser();
-        $notifications = Notification::where('user_id', $firebaseUser->uid)->get();
-        return response()->json(['notifications' => $notifications], 200);
-
+        $notifications = Notification::with('user')->get();
+        return response()->json(['data' => $notifications]);
     }
-    public function store(Request $request, Auth $firebaseAuth)
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
     {
-        $firebaseUser = $firebaseAuth->getUser();
+        // Validate incoming request data
+        $validator = Validator::make($request->all(), [
+            'img' => 'nullable',
+            'name' => 'string|nullable',
+            'massage' => 'nullable|string',
+            'status' => 'required|in:active,inactive',
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Create and save new Notification
         $notification = new Notification();
-        $notification->img = $request->img;
-        $notification->name = $request->name;
-        $notification->message = $request->message;
-        $notification->status = 'active';
-        $notification->user_id = $firebaseUser->uid;
-        $notification->is_active = true;
+        if ($request->hasFile('img')) {
+            $img = $request->file('img');
+            $imageName = time() . 'img.' . $img->getClientOriginalExtension();
+            $img->move('storage/images/' . $notification->id, $imageName);
+            $notification->img = $imageName;
+        }
+
+        $notification->name = $request->input('name');
+        $notification->massage = $request->input('massage');
+        $notification->status = $request->input('status');
+        $notification->user_id = $request->input('user_id');
         $notification->save();
-        return response()->json(['notification' => $notification], 201);
+
+        // Return success response
+        return response()->json([
+            'status' => true,
+            'message' => "Created successfully",
+            'data' => $notification,
+        ], 200);
     }
 
-    public function show($id, Auth $firebaseAuth)
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
     {
-        $firebaseUser = $firebaseAuth->getUser();
-        $notification = Notification::where('user_id', $firebaseUser->uid)->find($id);
-        if (!$notification) {
-            return response()->json(['message' => 'Notification not found'], 404);
-        }
-        return response()->json(['notification' => $notification], 200);
+        $notification = Notification::with('user')->findOrFail($id);
+        return response()->json(['data' => $notification]);
     }
 
-    public function update(Request $request, $id, Auth $firebaseAuth)
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, $id)
     {
-        $firebaseUser = $firebaseAuth->getUser();
-        $notification = Notification::where('user_id', $firebaseUser->uid)->find($id);
-        if (!$notification) {
-            return response()->json(['message' => 'Notification not found'], 404);
+        $validator = Validator::make($request->all(), [
+            'img' => 'nullable',
+            'name' => 'string|nullable',
+            'massage' => 'string',
+            'status' => '|in:active,inactive',
+            'user_id' => '|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
         }
-        $notification->img = $request->img ?? $notification->img;
-        $notification->name = $request->name ?? $notification->name;
-        $notification->message = $request->message ?? $notification->message;
-        $notification->status = $request->status ?? $notification->status;
-        $notification->is_active = $request->is_active ?? $notification->is_active;
-        $notification->save();
-        return response()->json(['notification' => $notification], 200);
+
+        $notification = Notification::find($id);
+        if ($notification) {
+            if (request()->hasFile('img')) {
+                $img = request()->file('img');
+                $imageName = time() . 'img.' . $img->getClientOriginalExtension();
+                $img->move('storage/images/' . $notification->id, $imageName);
+                $notification->img = $imageName;
+            }
+
+            $notification->name = request()->input('name');
+            $notification->massage = request()->input('massage');
+            $notification->status = request()->input('status');
+            $notification->user_id = request()->input('user_id');
+
+            $isUpdated = $notification->save();
+
+            if ($isUpdated) {
+                return response()->json([
+                    'status' => true,
+                    'message' => "Updated successfully",
+                    'data'=> $notification
+                ], 200);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => "Update failed",
+                ], 400);
+            }
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => "User not found",
+            ], 404);
+        }
+
     }
 
-    public function destroy($id, Auth $firebaseAuth)
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
     {
-        $firebaseUser = $firebaseAuth->getUser();
-        $notification = Notification::where('user_id', $firebaseUser->uid)->find($id);
-        if (!$notification) {
-            return response()->json(['message' => 'Notification not found'], 404);
-        }
-        $notification->delete();
-        return response()->json(['message' => 'Notification deleted'], 200);
+        $notification = Notification::destroy($id);
+        return response()->json([
+            'status' => true,
+            'message' => 'Notification deleted successfully',
+        ]);
     }
 }

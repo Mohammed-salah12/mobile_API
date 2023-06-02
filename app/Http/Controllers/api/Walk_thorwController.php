@@ -59,59 +59,59 @@ class Walk_thorwController extends Controller
     public function store(Request $request)
     {
         $valedetor=validator(request()->all([
-            'Fimg'=>'required',
-            'Ftitle'=>'nullable|string',
-            'Fdescription'=>'required|string',
-            'Simg'=>'required',
-            'Stitle'=>'nullable|string',
-            'Sdescription'=>'required|string',
-            'Timg'=>'required',
-            'Ttitle'=>'nullable|string',
-            'Tdescription'=>'required|string',
+            'f_img'=>'nullable',
+            'f_title'=>'nullable|string',
+            'f_description'=>'required|string',
+            's_img'=>'nullable',
+            's_title'=>'nullable|string',
+            's_description'=>'required|string',
+            't_img'=>'nullable',
+            't_title'=>'nullable|string',
+            't_description'=>'required|string',
 
         ]));
         if(! $valedetor->fails() ){
             $walk_throws= new Walk_throw();
-            $walk_throws->Ftitle=$request->get('Ftitle');
-            $walk_throws->Fdescription=$request->get('Fdescription');
-            if (request()->hasFile('Fimg')) {
+            $walk_throws->f_title=$request->get('f_title');
+            $walk_throws->f_description=$request->get('f_description');
+            if (request()->hasFile('f_img')) {
 
-                $img = $request->file('Fimg');
+                $img = $request->file('f_img');
 
-                $imageName = time() . 'Fimg.' . $img->getClientOriginalExtension();
+                $imageName = time() . 'f_img.' . $img->getClientOriginalExtension();
 
                 $img->move('storage/images/walk_throw', $imageName);
 
-                $walk_throws->Fimg = $imageName;
+                $walk_throws->f_img = $imageName;
                 $walk_throws->save();
 
             }
-            $walk_throws->Stitle=$request->get('Stitle');
-            $walk_throws->Sdescription=$request->get('Sdescription');
-            if (request()->hasFile('Simg')) {
+            $walk_throws->s_title=$request->get('s_title');
+            $walk_throws->s_description=$request->get('s_description');
+            if (request()->hasFile('s_img')) {
 
-                $img = $request->file('Simg');
+                $img = $request->file('s_img');
 
-                $imageName = time() . 'Simg.' . $img->getClientOriginalExtension();
+                $imageName = time() . 's_img.' . $img->getClientOriginalExtension();
 
                 $img->move('storage/images/walk_throw', $imageName);
 
-                $walk_throws->Simg = $imageName;
+                $walk_throws->s_img = $imageName;
                 $walk_throws->save();
 
             }
 
-            $walk_throws->Ttitle=$request->get('Ttitle');
-            $walk_throws->Tdescription=$request->get('Tdescription');
-            if (request()->hasFile('Timg')) {
+            $walk_throws->t_title=$request->get('t_title');
+            $walk_throws->t_description=$request->get('t_description');
+            if (request()->hasFile('t_img')) {
 
-                $img = $request->file('Timg');
+                $img = $request->file('t_img');
 
-                $imageName = time() . 'Timg.' . $img->getClientOriginalExtension();
+                $imageName = time() . 't_img.' . $img->getClientOriginalExtension();
 
                 $img->move('storage/images/walk_throw', $imageName);
 
-                $walk_throws->Timg = $imageName;
+                $walk_throws->t_img = $imageName;
                 $walk_throws->save();
 
             }
@@ -120,8 +120,9 @@ class Walk_thorwController extends Controller
             if ($IsSaved) {
                 return response()->json([
                     'status' => true,
-                    'massage' => "Created is successfully"],
-                    200);
+                    'message' => "Created successfully",
+                    'data' => $walk_throws,
+                ], 201);
             } else {
                 return response()->json([
                     'status' => false,
@@ -164,53 +165,61 @@ class Walk_thorwController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'img' => 'nullable|string',
-            'title' => 'nullable|string',
-            'description' => 'nullable|string'
+            'f_img' => 'nullable|string',
+            'f_title' => 'nullable|string',
+            'f_description' => 'nullable|string' ,
+            's_img' => 'nullable|string',
+            's_title' => 'nullable|string',
+            's_description' => 'nullable|string' ,
+            't_img' => 'nullable|string',
+            't_title' => 'nullable|string',
+            't_description' => 'nullable|string'
+
+
         ]);
 
         if (!$validator->fails()) {
             $walk_throws = Walk_throw::find($id);
-            $walk_throws->Ftitle=$request->get('Ftitle');
-            $walk_throws->Fdescription=$request->get('Fdescription');
-            if (request()->hasFile('Fimg')) {
+            $walk_throws->f_title=$request->get('f_title');
+            $walk_throws->f_description=$request->get('f_description');
+            if (request()->hasFile('f_img')) {
 
-                $img = $request->file('Fimg');
+                $img = $request->file('f_img');
 
-                $imageName = time() . 'Fimg.' . $img->getClientOriginalExtension();
+                $imageName = time() . 'f_img.' . $img->getClientOriginalExtension();
 
                 $img->move('storage/images/walk_throw', $imageName);
 
-                $walk_throws->Fimg = $imageName;
+                $walk_throws->f_img = $imageName;
                 $walk_throws->save();
 
             }
-            $walk_throws->Stitle=$request->get('Stitle');
-            $walk_throws->Sdescription=$request->get('Sdescription');
-            if (request()->hasFile('Simg')) {
+            $walk_throws->s_title=$request->get('s_title');
+            $walk_throws->s_description=$request->get('s_description');
+            if (request()->hasFile('s_img')) {
 
-                $img = $request->file('Simg');
+                $img = $request->file('s_img');
 
-                $imageName = time() . 'Simg.' . $img->getClientOriginalExtension();
+                $imageName = time() . 's_img.' . $img->getClientOriginalExtension();
 
                 $img->move('storage/images/walk_throw', $imageName);
 
-                $walk_throws->Simg = $imageName;
+                $walk_throws->s_img = $imageName;
                 $walk_throws->save();
 
             }
 
-            $walk_throws->Ttitle=$request->get('Ttitle');
-            $walk_throws->Tdescription=$request->get('Tdescription');
-            if (request()->hasFile('Timg')) {
+            $walk_throws->t_title=$request->get('t_title');
+            $walk_throws->t_description=$request->get('t_description');
+            if (request()->hasFile('t_img')) {
 
-                $img = $request->file('Timg');
+                $img = $request->file('t_img');
 
-                $imageName = time() . 'Timg.' . $img->getClientOriginalExtension();
+                $imageName = time() . 't_img.' . $img->getClientOriginalExtension();
 
                 $img->move('storage/images/walk_throw', $imageName);
 
-                $walk_throws->Timg = $imageName;
+                $walk_throws->t_img = $imageName;
                 $walk_throws->save();
 
             }
@@ -219,7 +228,8 @@ class Walk_thorwController extends Controller
             if ($isUpdated) {
                 return response()->json([
                     'status' => true,
-                    'message' => "Update successful"
+                    'message' => "Update successful" ,
+                    'data' =>$walk_throws
                 ], 200);
             } else {
                 return response()->json([

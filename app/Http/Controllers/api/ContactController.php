@@ -38,11 +38,10 @@ class ContactController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request, Auth $firebaseAuth)
+    public function index()
     {
-        $firebaseUser = $firebaseAuth->getUser();
-        $contacts = Contact::where('user_id', $firebaseUser->uid)->get(['name', 'number']);
-        return response()->json(['contacts' => $contacts], 200);
+        $contacts = Contact::with('user')->get();
+        return response()->json(['data' => $contacts]);
     }
 
     /**
@@ -51,23 +50,32 @@ class ContactController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request , Auth $firebaseAuth)
+    public function store(Request $request)
     {
-        $firebaseUser = $firebaseAuth->getUser();
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'number' => 'required|numeric',
+        // Validate incoming request data
+        $validator = Validator::make($request->all(), [
+            'name' => 'string|required',
+            'number' => 'required',
+            'user_id' => 'exists:users,id',
         ]);
 
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Create and save new Contact
         $contact = new Contact();
         $contact->name = $request->input('name');
         $contact->number = $request->input('number');
-        $contact->user_id = $firebaseUser->uid;
+        $contact->user_id = $request->input('user_id');
         $contact->save();
 
-        return response()->json(['contact' => $contact], 201);
-    }
+        // Return success response
+        return response()->json([
+            'status' => true,
+            'message' => "Created successfully",
+            'data' => $contact,
+        ], 201);    }
 
     /**
      * Display the specified resource.
@@ -75,13 +83,10 @@ class ContactController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, Auth $firebaseAuth,$id)
+    public function show($id)
     {
-        $firebaseUser = $firebaseAuth->getUser();
-        $contact = Contact::where('id', $id)
-            ->where('user_id', $firebaseUser->uid)
-            ->firstOrFail(['name', 'number']);
-        return response()->json(['contact' => $contact], 200);
+        $contact = Contact::with('user')->findOrFail($id);
+        return response()->json(['data' => $contact]);
     }
 
     /**
@@ -91,30 +96,47 @@ class ContactController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Auth $firebaseAuth,Request $request, $id)
+    public function update(Request $request, $id)
     {
-        $firebaseUser = $firebaseAuth->getUser();
-
-        $request->validate([
-            'name' => 'string|max:255',
-            'number' => 'numeric',
+        $validator = Validator::make($request->all(), [
+            'name' => 'string|',
+            'number' => 'integer',
+            'user_id' => 'exists:users,id',
         ]);
 
-        $contact = Contact::where('id', $id)
-            ->where('user_id', $firebaseUser->uid)
-            ->firstOrFail();
-
-        if ($request->has('name')) {
-            $contact->name = $request->input('name');
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
         }
 
-        if ($request->has('number')) {
-            $contact->number = $request->input('number');
+        $contact = Contact::find($id);
+        if ($contact) {
+            $contact->name = $request->get('name');
+            $contact->number = $request->get('number');
+            $contact->user_id = $request->get('user_id');
+
+            $isUpdated = $contact->save();
+            if ($isUpdated) {
+                return response()->json([
+                    'status' => true,
+                    'message' => "Updated successfully",
+                    'data'=>$contact
+                ], 200
+                );
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => "Update failed",
+                ], 400);
+            }
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => "User not found",
+            ], 404);
         }
-
-        $contact->save();
-
-        return response()->json(['contact' => $contact], 200);
     }
 
     /**
@@ -123,17 +145,12 @@ class ContactController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Auth $firebaseAuth,$id)
+    public function destroy($id)
     {
-        $firebaseUser = $firebaseAuth->getUser();
-
-        $contact = Contact::where('id', $id)
-            ->where('user_id', $firebaseUser->uid)
-            ->firstOrFail();
-
-        $contact->delete();
-
-        return response()->json(['message' => 'Contact deleted successfully'], 200);
-
+        $contact = Contact::destroy($id);
+        return response()->json([
+            'status' => true,
+            'message' => 'Contact deleted successfully',
+        ]);
     }
 }

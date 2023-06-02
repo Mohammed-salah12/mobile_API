@@ -73,9 +73,14 @@ class AttachmentController extends Controller
         $attachment->user_id = $request->input('user_id');
         $attachment->save();
 
-        // Return success response
-        return response()->json(['message' => 'attachment created successfully', 'data' => $attachment], 201);
+        // Return success response with the created attachment
+        return response()->json([
+            'status' => true,
+            'message' => "Created successfully",
+            'data' => $attachment,
+        ], 201);
     }
+
 
     /**
      * Display the specified resource.
@@ -102,23 +107,47 @@ class AttachmentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $attachment= Attachment::find($id);
+        $attachment = Attachment::find($id);
 
         if (!$attachment) {
-            return response()->json(['message' => 'attachment not found'], 404);
+            return response()->json([
+                'status' => false,
+                'message' => 'attachment not found'
+            ], 404);
         }
 
-        $validatedData = $request->validate([
-            'img' => 'nullable|string',
-            'name' => 'required|string',
-            'user_id' => 'required|exists:users,id',
-            'task_id' => 'required|exists:tasks,id',
-            'is_active' => 'nullable|boolean',
+        $validator = Validator::make($request->all(), [
+            'name' => 'string|nullable',
+            'size' => 'string|nullable',
+            'task_id' => 'exists:tasks,id',
+            'user_id' => 'exists:users,id',
         ]);
 
-        $attachment->update($validatedData);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
 
-        return response()->json(['message' => 'attachment updated successfully', 'data' => $attachment], 200);
+        $attachment->name = $request->input('name', $attachment->name);
+        $attachment->size = $request->input('size', $attachment->size);
+        $attachment->task_id = $request->input('task_id', $attachment->task_id);
+        $attachment->user_id = $request->input('user_id', $attachment->user_id);
+        $isUpdated = $attachment->save();
+
+        if ($isUpdated) {
+            return response()->json([
+                'status' => true,
+                'message' => 'attachment updated successfully',
+                'data' => $attachment
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to update attachment'
+            ], 500);
+        }
     }
 
     /**

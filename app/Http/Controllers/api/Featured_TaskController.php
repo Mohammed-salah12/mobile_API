@@ -45,7 +45,6 @@ class Featured_TaskController extends Controller
     public function index()
     {
         $featuredTasks = Featured_Task::with('user', 'task')->get();
-
         return response()->json(['featuredTasks' => $featuredTasks]);
     }
 
@@ -71,7 +70,11 @@ class Featured_TaskController extends Controller
             'task_id' => $request->task_id,
         ]);
 
-        return response()->json(['featuredTask' => $featuredTask], 201);
+        return response()->json([
+            'status' => true,
+            'message' => "Created successfully",
+            'data' => $featuredTask,
+        ], 201);
     }
 
     /**

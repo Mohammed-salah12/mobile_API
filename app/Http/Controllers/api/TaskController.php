@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreTaskRequest;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
@@ -42,11 +43,7 @@ class TaskController extends Controller
     public function index(Request $request)
     {
         $tasks_all=Task::orderBy('id' , 'desc')->get();
-        return response()->json([
-            'status' => true ,
-            'massege' => 'data of tasks' ,
-            'data' => $tasks_all ,
-        ]);
+
 
         $sortBy = $request->get('sort_by', 'created-at');
         $order = $request->get('order', 'desc');
@@ -66,7 +63,7 @@ class TaskController extends Controller
                 $query = Task::orderByRaw('LOWER(alphabetical-order)')->get();
                 break;
             case 'due-date':
-                $query->orderByRaw("ABS(TIMESTAMPDIFF(SECOND, NOW(), CONCAT(CURDATE(), ' ', time_hours, ':', time_min, ' ', time_am_bm)))");
+                $query->orderByRaw("ABS(TIMESTAMPDIFF(SECOND, NOW(), CONCAT(CURDATE(), ' ', time_hours, ':', time_min, ' ', time_min)))");
                 break;
             default:
                 $query->orderBy('created_at', $order);
@@ -89,10 +86,18 @@ class TaskController extends Controller
         $doneTasks = Task::where('status', 'done')->get();
 
         return response()->json([
+            'status' => true ,
+            'massege' => 'data of tasks' ,
+            'data' => $tasks_all ,
+        ]);
+
+        return response()->json([
             'tasks' => $tasks,
             'activeTasks' => $activeTasks,
             'doneTasks' => $doneTasks
         ]);
+
+
     }
 
     /**
@@ -104,49 +109,40 @@ class TaskController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string',
-            'category_id' => 'required|exists:projects,id',
-            'status' => 'required|in:active,done',
-            'description' => 'required|string',
-            'time_Min' => 'required|numeric|min:0|max:59',
-            'time_Am_BM' => 'required|in:am,pm',
-            'time_Hours' => 'required|numeric|min:0|max:23',
-            'sort_by' => 'nullable|in:importance,alphabetical-order,due-date,created-at',
-            'project_id' => 'required|exists:projects,id',
+            'name' => 'string',
+            'category_id' => 'exists:projects,id',
+            'status' => 'in:active,done',
+            'description' => 'string',
+            'time_min' => 'numeric|min:0|max:59',
+            'time_hours' => 'numeric|min:0|max:23',
+            'sort_by' => 'in:importance,alphabetical-order,due-date,created-at',
+            'project_id' => 'exists:projects,id',
+            'is_active' => 'boolean'
         ]);
-
         if ($validator->fails()) {
             return response()->json([
                 'status' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
+                'message' => $validator->errors()->first()
             ], 400);
         }
 
         $task = new Task();
         $task->name = $request->get('name');
         $task->category_id = $request->get('category_id');
+        $task->time_hours = $request->get('time_hours');
         $task->status = $request->get('status');
         $task->description = $request->get('description');
-        $task->time_Min = $request->get('time_Min');
-        $task->time_Am_BM = $request->get('time_Am_BM');
+        $task->time_min = $request->get('time_min');
         $task->sort_by = $request->get('sort_by');
         $task->project_id = $request->get('project_id');
 
-        $isSaved = $task->save();
+        $task->save();
 
-        if ($isSaved) {
-            return response()->json([
-                'status' => true,
-                'message' => 'Task created successfully',
-                'task' => $task,
-            ], 200);
-        } else {
-            return response()->json([
-                'status' => false,
-                'message' => 'Task creation failed',
-            ], 400);
-        }
+        return response()->json([
+            'status' => true,
+            'message' => 'created successfully',
+            'task' => $task->fresh(),
+        ], 200);
     }
 
     /**
@@ -195,8 +191,8 @@ class TaskController extends Controller
             'category_id' => 'exists:projects,id',
             'status' => 'in:active,done',
             'description' => 'string',
-            'time_Min' => 'date_format:H:i',
-            'time_Am_BM' => 'in:am,pm',
+            'time_min' => 'date_format:H:i',
+            'time_min' => 'in:am,pm',
             'sort_by' => 'in:importance,alphabetical-order,due-date,created-at',
             'project_id' => 'exists:projects,id',
             'is_active' => 'boolean'
@@ -213,8 +209,8 @@ class TaskController extends Controller
         $task->category_id = $request->input('category_id', $task->category_id);
         $task->status = $request->input('status', $task->status);
         $task->description = $request->input('description', $task->description);
-        $task->time_Min = $request->input('time_Min', $task->time_Min);
-        $task->time_Am_BM = $request->input('time_Am_BM', $task->time_Am_BM);
+        $task->time_min = $request->input('time_min', $task->time_min);
+        $task->time_min = $request->input('time_min', $task->time_min);
         $task->sort_by = $request->input('sort_by', $task->sort_by);
         $task->project_id = $request->input('project_id', $task->project_id);
         $task->is_active = $request->input('is_active', $task->is_active);

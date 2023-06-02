@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateNotifcationsTable extends Migration
+class CreateNotificationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateNotifcationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('notifcations', function (Blueprint $table) {
+        Schema::create('notifications', function (Blueprint $table) {
             $table->id();
             $table->string('img');
             $table->string('name');
@@ -33,6 +33,6 @@ class CreateNotifcationsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('notifcations');
+        Schema::dropIfExists('notifications');
     }
 }

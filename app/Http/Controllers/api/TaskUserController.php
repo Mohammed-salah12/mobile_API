@@ -68,24 +68,6 @@ class TaskUserController extends Controller
         ]);
     }
 
-    public function updateUserState(Request $request)
-    {
-        $request->validate([
-            'task_id' => 'required|integer',
-            'user_id' => 'required|integer',
-            'is_active' => 'required|boolean',
-        ]);
-
-        $task = Task::findOrFail($request->input('task_id'));
-
-        $user = User::findOrFail($request->input('user_id'));
-
-        $task->users()->updateExistingPivot($user, ['is_active' => $request->input('is_active')]);
-
-        return response()->json([
-            'message' => 'User state updated successfully.',
-        ]);
-    }
 
     /**
      * Display a listing of the resource.

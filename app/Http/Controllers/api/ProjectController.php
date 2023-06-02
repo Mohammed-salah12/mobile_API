@@ -70,9 +70,9 @@ class ProjectController extends Controller
             'category' => 'required|in:1,2,3,4',
             'priority' => 'required|in:1,2,3,4',
             'status' => 'required|in:active,done',
-            'time_Hours' => 'required|numeric|min:0|max:23',
-            'time_Min' => 'required|numeric|min:0|max:59',
-            'time_Am_BM' => 'required|in:am,pm',
+            'time_hours' => 'required|numeric|min:0|max:23',
+            'time_min' => 'required|numeric|min:0|max:59',
+            'time_am_bm' => 'required|in:am,pm',
         ]);
 
         if ($validator->fails()) {
@@ -87,9 +87,9 @@ class ProjectController extends Controller
         $projects->category = $request->input('category');
         $projects->priority = $request->input('priority');
         $projects->status = $request->input('status');
-        $projects->time_Hours = $request->input('time_Hours');
-        $projects->time_Min = $request->input('time_Min');
-        $projects->time_Am_BM = $request->input('time_Am_BM');
+        $projects->time_hours = $request->input('time_Hours');
+        $projects->time_min = $request->input('time_Min');
+        $projects->time_am_bm = $request->input('time_Am_BM');
         $projects->save();
 
         return response()->json([
@@ -142,7 +142,6 @@ class ProjectController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'string',
-            'type_Of_Project' => 'in:work,personal,wishlist,birthdays',
             'category' => 'in:work,personal,wishlist,birthdays',
             'priority' => 'in:important_AND_URGENT,important_But_Not_URGENT,not_Important_Or_URGENT,not_A_Proirity',
             'status' => 'in:active,done',
@@ -160,7 +159,6 @@ class ProjectController extends Controller
         }
 
         $project->name = $request->input('name', $project->name);
-        $project->type_Of_Project = $request->input('type_Of_Project', $project->type_Of_Project);
         $project->category = $request->input('category', $project->category);
         $project->priority = $request->input('priority', $project->priority);
         $project->status = $request->input('status', $project->status);

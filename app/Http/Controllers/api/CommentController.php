@@ -54,8 +54,8 @@ class CommentController extends Controller
     {
         // Validate incoming request data
         $validator = Validator::make($request->all(), [
-            'img' => 'required',
-            'name' => 'required|string',
+            'img' => 'nullable',
+            'name' => 'string|nullable',
             'task_id' => 'required|exists:tasks,id',
             'user_id' => 'required|exists:users,id',
         ]);
@@ -64,28 +64,20 @@ class CommentController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Create and save new comment
+        // Create and save new Comment
         $comment = new Comment();
+        $comment->img = $request->input('img');
         $comment->name = $request->input('name');
         $comment->task_id = $request->input('task_id');
         $comment->user_id = $request->input('user_id');
         $comment->save();
 
-        if (request()->hasFile('img')) {
-
-            $img = $request->file('img');
-
-            $imageName = time() . 'img.' . $img->getClientOriginalExtension();
-
-            $img->move('storage/images/comments', $imageName);
-
-            $comment->img = $imageName;
-            $comment->save();
-
-        }
         // Return success response
-        return response()->json(['message' => 'Comment created successfully', 'data' => $comment], 201);
-    }
+        return response()->json([
+            'status' => true,
+            'message' => "Created successfully",
+            'data' => $comment,
+        ], 201);    }
 
     /**
      * Display the specified resource.
@@ -96,11 +88,7 @@ class CommentController extends Controller
     public function show($id)
     {
         $comment = Comment::with('task', 'user')->findOrFail($id);
-        return response()->json([
-            'comment' => $comment,
-            'task' => $comment->task,
-            'user' => $comment->user,
-        ]);
+        return response()->json(['data' => $comment]);
     }
 
     /**
@@ -115,21 +103,52 @@ class CommentController extends Controller
         $comment = Comment::find($id);
 
         if (!$comment) {
-            return response()->json(['message' => 'Comment not found'], 404);
+            return response()->json([
+                'status' => false,
+                'message' => 'Comment not found'
+            ], 404);
         }
 
-        $validatedData = $request->validate([
-            'img' => 'nullable|string',
-            'name' => 'required|string',
-            'user_id' => 'required|exists:users,id',
-            'task_id' => 'required|exists:tasks,id',
-            'is_active' => 'nullable|boolean',
+        $validator = Validator::make($request->all(), [
+            'img' => 'nullable',
+            'name' => 'string|nullable',
+            'task_id' => 'exists:tasks,id',
+            'user_id' => 'exists:users,id',
         ]);
 
-        $comment->update($validatedData);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+            ], 400);
+        }
 
-        return response()->json(['message' => 'Comment updated successfully', 'data' => $comment], 200);
+        if ($request->hasFile('img')) {
+            $img = $request->file('img');
+            $imageName = time() . 'img.' . $img->getClientOriginalExtension();
+            $img->move('storage/images/' . $comment->id, $imageName);
+            $comment->img = $imageName;
+        }
+
+        $comment->name = $request->input('name', $comment->name);
+        $comment->task_id = $request->input('task_id', $comment->task_id);
+        $comment->user_id = $request->input('user_id', $comment->user_id);
+        $isUpdated = $comment->save();
+
+        if ($isUpdated) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Comment updated successfully',
+                'data' => $comment
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Failed to update comment'
+            ], 500);
+        }
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -139,10 +158,10 @@ class CommentController extends Controller
      */
     public function destroy($id)
     {
-        $comment=Comment::destroy($id);
+        $comment = Comment::destroy($id);
         return response()->json([
-            'status'=>true ,
-            'massage'=>'deleled succsesfully',
+            'status' => true,
+            'message' => 'Comment deleted successfully',
         ]);
     }
 }
